@@ -1,58 +1,56 @@
-import { Component } from '@angular/core';
-import type { OnInit } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  inject,
+  Input,
+  type OnInit
+} from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import type { ParamMap } from '@angular/router';
-
-// rxjs
-import { EMPTY, Observable, catchError, switchMap } from 'rxjs';
-
+import { EMPTY, type Observable, catchError } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import type { UserModel } from './../../models/user.model';
 import { UserArrayService } from './../../services/user-array.service';
 
 @Component({
   templateUrl: './user-list.component.html',
-  styleUrls: ['./user-list.component.css']
+  styleUrls: ['./user-list.component.css'],
 })
 export class UserListComponent implements OnInit {
   users$!: Observable<Array<UserModel>>;
 
+  @Input() editedUserID!: string;
+
+  private userArrayService = inject(UserArrayService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private destroyRef = inject(DestroyRef);
   private editedUser!: UserModel;
 
-  constructor(
-    private userArrayService: UserArrayService,
-    private router: Router,
-    private route: ActivatedRoute
-  ) {}
-
   ngOnInit(): void {
-    this.users$ = this.userArrayService.users$
-      .pipe(
-        catchError(err => {
-          console.log(err);
-          return EMPTY;
-        })
-      );
+    this.users$ = this.userArrayService.users$.pipe(
+      catchError((err) => {
+        console.log(err);
+        return EMPTY;
+      })
+    );
 
-    // listen editedUserID from UserFormComponent
+    // listen to editedUserID => editedUser from UserFormComponent
     const observer = {
       next: (user: UserModel) => {
         this.editedUser = { ...user };
-        console.log(
-          `Last time you edited user ${JSON.stringify(this.editedUser)}`
-        );
+        console.log(`Last time you edited user ${JSON.stringify(this.editedUser)}`);
       },
-      error: (err: any) => console.log(err)
+      error: (err: any) => console.log(err),
+      complete: () => console.log('Complete listening to editedUser')
     };
-    this.route.paramMap
-      .pipe(
-        switchMap((params: ParamMap) =>
-          this.userArrayService.getUser(params.get('editedUserID')!)
-        )
-      )
+
+    this.userArrayService
+      .getUser(this.editedUserID)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(observer);
   }
 
-  onEditUser({ id } : UserModel): void {
+  onEditUser({ id }: UserModel): void {
     const link = ['/users/edit', id];
     this.router.navigate(link);
     // or

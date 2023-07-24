@@ -1,8 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject, type OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { TaskArrayService } from './../../services/task-array.service';
-
-import type { OnInit } from '@angular/core';
 import type { TaskModel } from './../../models/task.model';
 
 @Component({
@@ -12,10 +10,8 @@ import type { TaskModel } from './../../models/task.model';
 export class TaskListComponent implements OnInit {
   tasks!: Promise<Array<TaskModel>>;
 
-  constructor(
-    private router: Router,
-    private taskArrayService: TaskArrayService
-  ) {}
+  private taskArrayService = inject(TaskArrayService);
+  private router = inject(Router);
 
   ngOnInit(): void {
     this.tasks = this.taskArrayService.getTasks();

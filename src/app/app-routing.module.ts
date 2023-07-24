@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core';
-import { type Routes, type ExtraOptions, PreloadAllModules, RouterModule, type UrlSegment, type UrlSegmentGroup, type Route, type UrlMatchResult } from '@angular/router';
+import { type Routes, type ExtraOptions, RouterModule, type UrlSegment, type UrlSegmentGroup, type Route, type UrlMatchResult } from '@angular/router';
 
-import { AuthGuard, CustomPreloadingStrategyService } from './core';
-import { AbcComponent, AboutComponent, LoginComponent, MessagesComponent, PathNotFoundComponent } from './layout';
+import { AbcComponent, AboutComponent, LoginComponent, PathNotFoundComponent, MessagesComponent } from './pages';
+import { canMatchAuthGuard, CustomPreloadingStrategyService } from './core';
 
 const routes: Routes = [
   {
@@ -17,16 +17,23 @@ const routes: Routes = [
   },
   {
     path: 'admin',
-    canLoad: [AuthGuard],
+    canMatch: [canMatchAuthGuard],
     loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule),
+    data: { preload: false },
     title: 'Admin'
+  },
+  {
+    path: 'admin',
+    redirectTo: '/login',
+    pathMatch: 'full'
   },
   {
     path: 'users',
     loadChildren: () => import('./users/users.module').then(m => m.UsersModule),
     title: 'Users',
     data: {
-      preload: true
+      preload: true,
+
     }
   },
   {
@@ -36,7 +43,6 @@ const routes: Routes = [
   },
   {
     component: AbcComponent,
-    title: 'Abc Component',
     matcher: (url: UrlSegment[], group: UrlSegmentGroup, route: Route): UrlMatchResult | null => {
       console.log(url, group, route);
       // один фрагмент, который включает 'abc'
@@ -58,7 +64,8 @@ const routes: Routes = [
 ];
 
 const extraOptions: ExtraOptions = {
-  preloadingStrategy: CustomPreloadingStrategyService
+  preloadingStrategy: CustomPreloadingStrategyService ,
+  bindToComponentInputs: true,
   // enableTracing: true  // Makes the router log all its internal events to the console.
 };
 

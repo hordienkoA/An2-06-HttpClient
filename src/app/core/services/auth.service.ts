@@ -25,4 +25,16 @@ export class AuthService {
     this.isLoggedIn = false;
     this.isAdmin = false;
   }
+
+  checkLogin(url: string): boolean {
+    if (this.isLoggedIn) {
+      return true;
+    }
+
+    // Store the attempted URL for redirecting
+    this.redirectUrl = url;
+
+    // Navigate to the login, return false
+    return false;
+  }
 }

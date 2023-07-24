@@ -104,7 +104,6 @@
       }
     }
   },
-  "defaultProject": "angular-http",
   "cli": {
     "analytics": false
   }

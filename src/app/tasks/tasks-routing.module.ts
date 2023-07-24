@@ -1,8 +1,9 @@
 import { NgModule } from '@angular/core';
-import type { MetaDefinition } from '@angular/platform-browser';
 import { RouterModule, type Routes } from '@angular/router';
 
 import { TaskListComponent, TaskFormComponent } from './components';
+
+import type { MetaDefinition } from '@angular/platform-browser';
 
 const metaTags: Array<MetaDefinition> = [
   {
@@ -19,7 +20,6 @@ const routes: Routes = [
   {
     path: 'home',
     component: TaskListComponent,
-    title: 'Task Manager',
     data: {
       meta: metaTags
     }

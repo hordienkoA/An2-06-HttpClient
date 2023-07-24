@@ -1,14 +1,17 @@
-import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
-import type { TaskModel } from './../../models/task.model';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { TaskModel } from '../../models/task.model';
 
 @Component({
   selector: 'app-task',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './task.component.html',
   styleUrls: ['./task.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TaskComponent {
-  @Input() task!: TaskModel;
+  @Input({ required: true}) task!: TaskModel;
 
   @Output() completeTask = new EventEmitter<TaskModel>();
   @Output() editTask = new EventEmitter<TaskModel>();
@@ -20,4 +23,5 @@ export class TaskComponent {
   onEditTask(): void {
     this.editTask.emit(this.task);
   }
+
 }

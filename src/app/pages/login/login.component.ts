@@ -1,28 +1,24 @@
-import { Component, type OnInit, type OnDestroy } from '@angular/core';
+import { Component, type OnInit, inject, DestroyRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, type NavigationExtras } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
-
-import { AuthService } from './../../../core';
+import { AuthService } from '../../core';
 
 @Component({
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent implements OnInit, OnDestroy {
+export class LoginComponent implements OnInit {
   message!: string;
+  authService = inject(AuthService);
 
-  private unsubscribe: Subject<void> = new Subject();
-
-  constructor(public authService: AuthService, private router: Router) {}
+  private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
 
   ngOnInit(): void {
     this.setMessage();
-  }
-
-  ngOnDestroy(): void {
-    console.log('[takeUntil ngOnDestroy]');
-    // this.unsubscribe.next();
-    this.unsubscribe.complete();
   }
 
   onLogin(): void {
@@ -47,15 +43,11 @@ export class LoginComponent implements OnInit, OnDestroy {
         }
       },
       error: (err: any) => console.log(err),
-      complete: () => console.log('[takeUntil] complete')
+      complete: () => console.log('[takeUntilDestroyed] complete')
     };
     this.authService
       .login()
-      // The TakeUntil subscribes and begins mirroring the source Observable.
-      // It also monitors a second Observable that you provide.
-      // If this second Observable emits an item or sends a termination notification,
-      // the Observable returned by TakeUntil stops mirroring the source Observable and terminates.
-      .pipe(takeUntil(this.unsubscribe))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(observer);
   }
 

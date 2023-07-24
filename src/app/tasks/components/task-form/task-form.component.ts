@@ -1,7 +1,5 @@
-import { Component, type OnInit } from '@angular/core';
-import { ActivatedRoute, Router, type ParamMap } from '@angular/router';
-import { map, switchMap } from 'rxjs';
-
+import { Component, inject, Input, type OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { TaskModel } from './../../models/task.model';
 import { TaskArrayService } from './../../services/task-array.service';
 
@@ -12,33 +10,19 @@ import { TaskArrayService } from './../../services/task-array.service';
 export class TaskFormComponent implements OnInit {
   task!: TaskModel;
 
-  constructor(
-    private taskArrayService: TaskArrayService,
-    private router: Router,
-    private route: ActivatedRoute
-  ) { }
+  @Input() taskID!: string; // pathParam
+
+  private taskArrayService = inject(TaskArrayService);
+  private router = inject(Router);
 
   ngOnInit(): void {
     this.task = new TaskModel();
 
-    // it is not necessary to save subscription to route.paramMap
-    // when router destroys this component, it handles subscriptions automatically
-    const observer = {
-      next: (task: TaskModel) => (this.task = { ...task }),
-      error: (err: any) => console.log(err)
-    };
-    this.route.paramMap
-      .pipe(
-        switchMap((params: ParamMap) =>
-          // notes about "!"
-          // params.get() returns string | null, but getTask takes string | number
-          // in this case taskID is a path param and can not be null
-          this.taskArrayService.getTask(params.get('taskID')!)
-        ),
-        // transform undefined => {}
-        map(el => el ? el : {} as TaskModel)
-      )
-      .subscribe(observer);
+    this.taskArrayService.getTask(this.taskID)
+      .then(task => {
+        this.task = task ?? {} as TaskModel;
+      })
+      .catch(err => console.log(err));
   }
 
   onSaveTask(): void {

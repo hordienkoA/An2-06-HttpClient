@@ -1,10 +1,9 @@
-import { Component, type OnInit} from '@angular/core';
-import { ActivatedRoute, Router, type UrlTree, type Data } from '@angular/router';
-import { type Observable, map } from 'rxjs';
-
-import { DialogService } from './../../../core';
+import { Component, type OnInit, inject, Input } from '@angular/core';
+import { ActivatedRoute, Router, type UrlTree } from '@angular/router';
+import type { Observable } from 'rxjs';
 import { UserModel } from './../../models/user.model';
 import { UserArrayService } from './../../services/user-array.service';
+import { DialogService } from './../../../core';
 import type { CanComponentDeactivate } from './../../../core';
 
 @Component({
@@ -15,36 +14,30 @@ export class UserFormComponent implements OnInit, CanComponentDeactivate {
   user!: UserModel;
   originalUser!: UserModel;
 
+  @Input({ required: true }) userFromResolver: UserModel = new UserModel(null, '', '');
+
+  private userArrayService = inject(UserArrayService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private dialogService = inject(DialogService);
   private onGoBackClick: boolean = false;
 
-  constructor(
-    private userArrayService: UserArrayService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private dialogService: DialogService
-  ) { }
-
   ngOnInit(): void {
-    // data is an observable object
-    // which contains custom and resolve data
-    this.route.data.pipe(map((data: Data) => data['user'])).subscribe((user: UserModel) => {
-      this.user = { ...user };
-      this.originalUser = { ...user };
-    });
+    this.user = {...this.userFromResolver};
+    this.originalUser = { ...this.userFromResolver };
   }
 
   onSaveUser(): void {
     const user = { ...this.user };
+    const method = user.id ? 'updateUser' : 'createUser';
+
+    this.userArrayService[method](user);
 
     if (user.id) {
-      this.userArrayService.updateUser(user);
-      // optional parameter: http://localhost:4200/users;id=2
-      this.router.navigate(['/users', { editedUserID: user.id }]);
+      this.router.navigate(['/users', {editedUserID: user.id}]);
     } else {
-      this.userArrayService.createUser(user);
       this.onGoBack();
     }
-    this.originalUser = { ...this.user };
   }
 
   onGoBack(): void {

@@ -8,17 +8,17 @@ import {
   ManageUsersComponent
 } from './components';
 
-import { AuthGuard } from './../core';
+import { canActivateAuthGuard, canActivateChildAuthGuard } from './../core';
 
 const routes: Routes = [
   {
     path: '',
     component: AdminComponent,
-    canActivate: [AuthGuard],
+    canActivate: [canActivateAuthGuard],
     children: [
       {
         path: '',
-        canActivateChild: [AuthGuard],
+        canActivateChild: [canActivateChildAuthGuard],
         children: [
           { path: 'users', component: ManageUsersComponent },
           { path: 'tasks', component: ManageTasksComponent },
@@ -35,7 +35,6 @@ const routes: Routes = [
 })
 export class AdminRoutingModule {
   static components = [
-    AdminComponent,
     AdminDashboardComponent,
     ManageTasksComponent,
     ManageUsersComponent
