@@ -2,7 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { NgModule } from '@angular/core';
 import { Router, TitleStrategy } from '@angular/router';
-
+import { HttpClientModule } from '@angular/common/http';
 // add this line if you don't have access to
 // index.html and you want to set base tag
 // import { APP_BASE_HREF } from '@angular/common';
@@ -20,7 +20,7 @@ import { PageTitleStrategy } from './core/services/page-title-strategy.service';
     FormsModule,
     TasksModule,
     SpinnerComponent,
-
+    HttpClientModule,
     // MUST BE LAST
     AppRoutingModule
 

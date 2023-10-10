@@ -14,8 +14,12 @@ export class UserComponent {
   @Input({ required: true }) user!: UserModel;
 
   @Output() editUser = new EventEmitter<UserModel>();
-
+  @Output() deleteUser = new EventEmitter<UserModel>();
   onEditUser(): void {
     this.editUser.emit(this.user);
+  }
+
+  onDeleteUser(): void{
+    this.deleteUser.emit(this.user);
   }
 }

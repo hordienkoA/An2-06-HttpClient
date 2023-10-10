@@ -2,12 +2,11 @@ import { inject } from '@angular/core';
 import { ResolveFn, Router } from '@angular/router';
 import { catchError, EMPTY, of, switchMap, take, delay, finalize } from 'rxjs';
 import { UserModel } from '../models/user.model';
-import { UserArrayService } from '../services';
+import {  UserObservableService } from '../services';
 import { SpinnerService } from './../../widgets';
 
 export const userResolver: ResolveFn<UserModel> = (route, state) => {
-  const userArrayService = inject(UserArrayService);
-  const spinner = inject(SpinnerService);
+  const userObservableService = inject(UserObservableService);  const spinner = inject(SpinnerService);
   const router = inject(Router);
 
   console.log('userResolver is called');
@@ -19,7 +18,7 @@ export const userResolver: ResolveFn<UserModel> = (route, state) => {
   spinner.show();
   const id = route.paramMap.get('userID')!;
 
-  return userArrayService.getUser(id).pipe(
+  return userObservableService.getUser(id).pipe(
     delay(2000),
     switchMap((user: UserModel) => {
       if (user) {

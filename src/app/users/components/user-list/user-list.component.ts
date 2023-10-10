@@ -10,6 +10,7 @@ import { EMPTY, type Observable, catchError } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import type { UserModel } from './../../models/user.model';
 import { UserArrayService } from './../../services/user-array.service';
+import { UserObservableService } from '../../services';
 
 @Component({
   templateUrl: './user-list.component.html',
@@ -18,21 +19,16 @@ import { UserArrayService } from './../../services/user-array.service';
 export class UserListComponent implements OnInit {
   users$!: Observable<Array<UserModel>>;
 
-  @Input() editedUserID!: string;
+  @Input() editedUserID: string | undefined;
 
-  private userArrayService = inject(UserArrayService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private destroyRef = inject(DestroyRef);
   private editedUser!: UserModel;
+  private userObservableService = inject(UserObservableService);
 
   ngOnInit(): void {
-    this.users$ = this.userArrayService.users$.pipe(
-      catchError((err) => {
-        console.log(err);
-        return EMPTY;
-      })
-    );
+    this.users$ = this.userObservableService.getUsers();
 
     // listen to editedUserID => editedUser from UserFormComponent
     const observer = {
@@ -44,10 +40,13 @@ export class UserListComponent implements OnInit {
       complete: () => console.log('Complete listening to editedUser')
     };
 
-    this.userArrayService
-      .getUser(this.editedUserID)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(observer);
+    if (this.editedUserID) {
+      this.userObservableService
+        .getUser(this.editedUserID)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(observer);
+}
+
   }
 
   onEditUser({ id }: UserModel): void {
@@ -65,6 +64,9 @@ export class UserListComponent implements OnInit {
     return false;
   }
 
+  onDeleteUser(user: UserModel): void{
+    this.users$ = this.userObservableService.deleteUser(user);
+  }
   trackByFn(index: number, user: UserModel): number | null {
     return user.id;
   }
